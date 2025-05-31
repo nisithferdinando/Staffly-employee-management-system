@@ -8,12 +8,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
+@CrossOrigin("*")
 @RequestMapping("/api/auth/hr")
 public class AuthController {
     private static final Logger logger= LoggerFactory.getLogger(AuthController.class);
@@ -32,9 +33,19 @@ public class AuthController {
             logger.info("Login successful");
             return ResponseEntity.status((HttpStatus.OK)).body(response);
         }
+        catch (RuntimeException e) {
+            logger.warn("Login error: {}", e.getMessage());
+            Map<String, String> errorResponse=new HashMap<>();
+            errorResponse.put("message", e.getMessage());
+            errorResponse.put("status", "error");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
         catch (Exception e){
             logger.error("Unexpected error during login.");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            Map<String, String> errorResponse=new HashMap<>();
+            errorResponse.put("message", "An expected error occurred during login.");
+            errorResponse.put("status", "error");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
  }
 }
